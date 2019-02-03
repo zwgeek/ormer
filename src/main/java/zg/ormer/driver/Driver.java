@@ -33,7 +33,7 @@ public abstract class Driver {
 
     public abstract void update(XBean xBean, List<Integer> pkeys, List<Integer> properties, Callback cb);
 
-    public abstract void query(Class<XBean> xBeanClass, Object condition, Callback cb);
+    public abstract void query(Class<? extends XBean> xBeanClass, Object condition, Callback cb);
 
     public interface ICondition<D> {
         D eq(Class<XBean> xBeanClass, int index, Object value);

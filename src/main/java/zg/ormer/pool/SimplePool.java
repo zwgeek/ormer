@@ -11,7 +11,7 @@ public class SimplePool<T extends XBean> implements IPool<T> {
     private Map<Class<? extends T>, List<T>> classObjects = new HashMap<>();
 
     @Override
-    public T malloc(Class<T> clz) throws Exception {
+    public T malloc(Class<? extends T> clz) throws Exception {
         List<T> objects = this.classObjects.get(clz);
         if (objects == null) {
             objects = new ArrayList<>();

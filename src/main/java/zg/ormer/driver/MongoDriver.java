@@ -121,7 +121,7 @@ public class MongoDriver extends Driver {
         collection.updateMany(and(conds), combine(sets), (result, throwable) -> cb.call(result, throwable));
     }
 
-    public void query(Class<XBean> xBeanClass, Object condition, Callback cb) {
+    public void query(Class<? extends XBean> xBeanClass, Object condition, Callback cb) {
         MongoCollection<Document> collection = this.database.getCollection(XBean.tblname(xBeanClass));
         List<XBean> xBeans = new ArrayList<>();
         collection.find((Bson)condition).forEach((document) -> {

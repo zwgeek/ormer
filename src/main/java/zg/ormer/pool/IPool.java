@@ -7,7 +7,7 @@ public interface IPool<T> {
      * 分配一个对象
      * @return
      */
-    T malloc(Class<T> clz) throws Exception;
+    T malloc(Class<? extends T> clz) throws Exception;
 
     /**
      * 释放一个对象
