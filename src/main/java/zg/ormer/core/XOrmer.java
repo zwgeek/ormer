@@ -13,12 +13,13 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 
 public class XOrmer {
-    public static final Logger logger = LogManager.getLogger(XBean.class);
+    public static final Logger logger = LogManager.getLogger(XOrmer.class);
     public static Driver driver;
     static {
         try {
+            String path = XOrmer.class.getClassLoader().getResource("ormer.properties").getPath();
             Properties properties = new Properties();
-            properties.load(new FileInputStream("ormer.properties"));
+            properties.load(new FileInputStream(path));
 
             Assert.verify(properties.getProperty("common.package") != null);
             Assert.verify(properties.getProperty("common.drvier") != null);
@@ -27,27 +28,30 @@ public class XOrmer {
             Assert.verify(properties.getProperty("common.drvier.database") != null);
 
             String[] clznames = ClzParse.findClassesByPackage(properties.getProperty("common.package"),
-                    new ArrayList<String>(Arrays.asList(XBean.class.getName())), ClzParse.EMPTY_LIST);
+                    ClzParse.EMPTY_LIST, ClzParse.EMPTY_LIST);
             for (String clzname : clznames) {
                 Class<?> clz = Class.forName(clzname);
+                if (clz.getSuperclass() != XBean.class) {
+                    continue;
+                }
                 List<String> propertyList = new ArrayList<>();
-                Map<String, Integer> propertyMap = new HashMap<String, Integer>();
+                Map<String, Integer> propertyMap = new HashMap<>();
                 for (Field field : clz.getDeclaredFields()) {
                     if (Modifier.isStatic(field.getModifiers())) {
-                        XProperty xProperty = clz.getAnnotation(XProperty.class);
+                        XProperty xProperty = field.getAnnotation(XProperty.class);
                         if (xProperty == null) continue;
-                        propertyList.set(field.getInt(clz), field.getName());
+                        propertyList.add(field.getInt(clz), field.getName());
                         propertyMap.put(field.getName(), field.getInt(clz));
                     }
                 }
-                XBean.className.put(clz, clzname);
+                XBean.className.put(clz, clz.getSimpleName());
                 XBean.classProperties.put(clz, propertyList);
                 XBean.classPropertyIndexs.put(clz, propertyMap);
             }
             Class<?> clz = Class.forName(properties.getProperty("common.drvier"));
-            Constructor ct = clz.getDeclaredConstructor(String.class, int.class, String.class);
+            Constructor ct = clz.getDeclaredConstructor(String.class, Integer.class, String.class);
             XOrmer.driver = (Driver) ct.newInstance(properties.getProperty("common.drvier.ip"),
-                    properties.getProperty("common.drvier.port"), properties.getProperty("common.drvier.database"));
+                    Integer.valueOf(properties.getProperty("common.drvier.port")), properties.getProperty("common.drvier.database"));
         } catch (Throwable e) {
             logger.error("uncatch exception:", e);
         }

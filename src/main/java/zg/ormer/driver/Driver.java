@@ -35,17 +35,17 @@ public abstract class Driver {
 
     public abstract void query(Class<? extends XBean> xBeanClass, Object condition, Callback cb);
 
-    public interface ICondition<D> {
-        D eq(Class<XBean> xBeanClass, int index, Object value);
-        D ne(Class<XBean> xBeanClass, int index, Object value);
-        D gt(Class<XBean> xBeanClass, int index, Object value);
-        D lt(Class<XBean> xBeanClass, int index, Object value);
-        D gte(Class<XBean> xBeanClass, int index, Object value);
-        D lte(Class<XBean> xBeanClass, int index, Object value);
-        D in(Class<XBean> xBeanClass, int index, Object... values);
-        D nin(Class<XBean> xBeanClass, int index, Object... values);
-        D and(D... datas);
-        D or(D... datas);
+    public interface ICondition {
+        Object eq(Class<? extends XBean> xBeanClass, int index, Object value);
+        Object ne(Class<? extends XBean> xBeanClass, int index, Object value);
+        Object gt(Class<? extends XBean> xBeanClass, int index, Object value);
+        Object lt(Class<? extends XBean> xBeanClass, int index, Object value);
+        Object gte(Class<? extends XBean> xBeanClass, int index, Object value);
+        Object lte(Class<? extends XBean> xBeanClass, int index, Object value);
+        Object in(Class<? extends XBean> xBeanClass, int index, Object... values);
+        Object nin(Class<? extends XBean> xBeanClass, int index, Object... values);
+        Object and(Object... datas);
+        Object or(Object... datas);
     }
 
     @FunctionalInterface

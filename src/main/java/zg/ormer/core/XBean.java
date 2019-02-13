@@ -14,7 +14,7 @@ public abstract class XBean implements Serializable {
     protected static Map<Class, List<String>> classProperties = new HashMap<>();
     protected static Map<Class, Map<String, Integer>> classPropertyIndexs = new HashMap<Class, Map<String, Integer>>();
 
-    private final List<Object> values = new ArrayList<>();
+    private Object[] values = new Object[XBean.classProperties.get(this.getClass()).size()];
 
     /**
      * 获取表名
@@ -49,7 +49,7 @@ public abstract class XBean implements Serializable {
      * @return
      */
     public Object get(int index) {
-        return this.values.get(index);
+        return this.values[index];
     }
 
     /**
@@ -58,7 +58,7 @@ public abstract class XBean implements Serializable {
      * @param value
      */
     public void set(int index, Object value) {
-        this.values.set(index, value);
+        this.values[index] = value;
     }
 
     /**
@@ -67,7 +67,7 @@ public abstract class XBean implements Serializable {
      */
     public void each(Callback cb) {
         for (Map.Entry<String, Integer> entry : XBean.classPropertyIndexs.get(this.getClass()).entrySet()) {
-            Object value = this.values.get(entry.getValue());
+            Object value = this.values[entry.getValue()];
             if (value == null) continue;
             cb.call(entry.getKey(), value);
         }
@@ -77,7 +77,9 @@ public abstract class XBean implements Serializable {
      * 清理
      */
     public void clear() {
-        this.values.clear();
+        for (int i = 0; i < this.values.length; i++) {
+            this.values[i] = null;
+        }
     }
 
     @FunctionalInterface

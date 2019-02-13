@@ -32,11 +32,11 @@ public class MongoDriver extends Driver {
     private MongoDatabase database;
     private IPool<XBean> pool;
 
-    public MongoDriver(String ip, int port, String database) {
+    public MongoDriver(String ip, Integer port, String database) {
         this(ip, port, database, 1);
     }
 
-    public MongoDriver(String ip, int port, String database, int connectNum) {
+    public MongoDriver(String ip, Integer port, String database, int connectNum) {
         super(new MongoCondition());
         try {
             this.client = MongoClients.create(new ConnectionString("mongodb://" + ip + ":" + port));
@@ -140,46 +140,54 @@ public class MongoDriver extends Driver {
         });
     }
 
-    static class MongoCondition implements ICondition<Bson> {
+    static class MongoCondition implements ICondition {
         @Override
-        public Bson eq(Class<XBean> xBeanClass, int index, Object value) {
+        public Object eq(Class<? extends XBean> xBeanClass, int index, Object value) {
             return Filters.eq(XBean.property(xBeanClass, index), value);
         }
         @Override
-        public Bson ne(Class<XBean> xBeanClass, int index, Object value) {
+        public Object ne(Class<? extends XBean> xBeanClass, int index, Object value) {
             return Filters.ne(XBean.property(xBeanClass, index), value);
         }
         @Override
-        public Bson gt(Class<XBean> xBeanClass, int index, Object value) {
+        public Object gt(Class<? extends XBean> xBeanClass, int index, Object value) {
             return Filters.gt(XBean.property(xBeanClass, index), value);
         }
         @Override
-        public Bson lt(Class<XBean> xBeanClass, int index, Object value) {
+        public Object lt(Class<? extends XBean> xBeanClass, int index, Object value) {
             return Filters.lt(XBean.property(xBeanClass, index), value);
         }
         @Override
-        public Bson gte(Class<XBean> xBeanClass, int index, Object value) {
+        public Object gte(Class<? extends XBean> xBeanClass, int index, Object value) {
             return Filters.gte(XBean.property(xBeanClass, index), value);
         }
         @Override
-        public Bson lte(Class<XBean> xBeanClass, int index, Object value) {
+        public Object lte(Class<? extends XBean> xBeanClass, int index, Object value) {
             return Filters.lte(XBean.property(xBeanClass, index), value);
         }
         @Override
-        public Bson in(Class<XBean> xBeanClass, int index, Object... values) {
+        public Object in(Class<? extends XBean> xBeanClass, int index, Object... values) {
             return Filters.in(XBean.property(xBeanClass, index), values);
         }
         @Override
-        public Bson nin(Class<XBean> xBeanClass, int index, Object... values) {
+        public Object nin(Class<? extends XBean> xBeanClass, int index, Object... values) {
             return Filters.nin(XBean.property(xBeanClass, index), values);
         }
         @Override
-        public Bson and(Bson... datas) {
-            return Filters.and(datas);
+        public Object and(Object... datas) {
+            Bson[] bsons = new Bson[datas.length];
+            for (int i = 0; i < datas.length; i++) {
+                bsons[i] = (Bson) datas[i];
+            }
+            return Filters.and(bsons);
         }
         @Override
-        public Bson or(Bson... datas) {
-            return Filters.or(datas);
+        public Object or(Object... datas) {
+            Bson[] bsons = new Bson[datas.length];
+            for (int i = 0; i < datas.length; i++) {
+                bsons[i] = (Bson) datas[i];
+            }
+            return Filters.or(bsons);
         }
     }
 }

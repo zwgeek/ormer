@@ -34,10 +34,12 @@ public class SimplePool<T extends XBean> implements IPool<T> {
 
     @Override
     public boolean free(List<T> ts) {
-        List<T> objects = this.classObjects.get(ts.get(0).getClass());
-        for (T t : ts) {
-            t.clear();
-            objects.add(t);
+        if (ts.size() > 0) {
+            List<T> objects = this.classObjects.get(ts.get(0).getClass());
+            for (T t : ts) {
+                t.clear();
+                objects.add(t);
+            }
         }
         return true;
     }
