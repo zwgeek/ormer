@@ -11,8 +11,11 @@ public abstract class Driver {
 
     public final ICondition condition;
 
-    public Driver(ICondition condition) {
+    public final ISort sort;
+
+    public Driver(ICondition condition, ISort sort) {
         this.condition = condition;
+        this.sort = sort;
     }
 
     public abstract void insert(XBean xBean, Callback cb);
@@ -35,7 +38,10 @@ public abstract class Driver {
 
     public abstract void query(Class<? extends XBean> xBeanClass, Object condition, Callback cb);
 
+    public abstract void query(Class<? extends XBean> xBeanClass, Object condition, Object sort, Callback cb);
+
     public interface ICondition {
+        Object exists(Class<? extends XBean> xBeanClass, int index);
         Object eq(Class<? extends XBean> xBeanClass, int index, Object value);
         Object ne(Class<? extends XBean> xBeanClass, int index, Object value);
         Object gt(Class<? extends XBean> xBeanClass, int index, Object value);
@@ -46,6 +52,11 @@ public abstract class Driver {
         Object nin(Class<? extends XBean> xBeanClass, int index, Object... values);
         Object and(Object... datas);
         Object or(Object... datas);
+    }
+
+    public interface ISort {
+        Object desc(Class<? extends XBean> xBeanClass, int... indexs);
+        Object asc(Class<? extends XBean> xBeanClass, int... indexs);
     }
 
     @FunctionalInterface

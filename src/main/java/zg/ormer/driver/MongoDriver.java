@@ -6,6 +6,7 @@ import com.mongodb.async.client.MongoClients;
 import com.mongodb.async.client.MongoCollection;
 import com.mongodb.async.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.Document;
@@ -37,7 +38,7 @@ public class MongoDriver extends Driver {
     }
 
     public MongoDriver(String ip, Integer port, String database, int connectNum) {
-        super(new MongoCondition());
+        super(new MongoCondition(), new MongoSort());
         try {
             this.client = MongoClients.create(new ConnectionString("mongodb://" + ip + ":" + port));
             this.database = this.client.getDatabase(database);
@@ -140,7 +141,30 @@ public class MongoDriver extends Driver {
         });
     }
 
+    public void query(Class<? extends XBean> xBeanClass, Object condition, Object sort, Callback cb) {
+        MongoCollection<Document> collection = this.database.getCollection(XBean.tblname(xBeanClass));
+        List<XBean> xBeans = new ArrayList<>();
+        collection.find((Bson)condition).sort((Bson)sort).forEach((document) -> {
+            try {
+                XBean xBean = this.pool.malloc(xBeanClass);
+                for (Map.Entry<String, Object> entry: document.entrySet()) {
+                    xBean.set(XBean.index(xBeanClass, entry.getKey()), entry.getValue());
+                }
+                xBeans.add(xBean);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, (result, throwable) -> {
+            cb.call(xBeans, throwable);
+            this.pool.free(xBeans);
+        });
+    }
+
     static class MongoCondition implements ICondition {
+        @Override
+        public Object exists(Class<? extends XBean> xBeanClass, int index) {
+            return Filters.exists(XBean.property(xBeanClass, index));
+        }
         @Override
         public Object eq(Class<? extends XBean> xBeanClass, int index, Object value) {
             return Filters.eq(XBean.property(xBeanClass, index), value);
@@ -188,6 +212,25 @@ public class MongoDriver extends Driver {
                 bsons[i] = (Bson) datas[i];
             }
             return Filters.or(bsons);
+        }
+    }
+
+    static class MongoSort implements ISort {
+        @Override
+        public Object desc(Class<? extends XBean> xBeanClass, int... indexs) {
+            String[] fieldNames = new String[indexs.length];
+            for (int i = 0; i < indexs.length; i++) {
+                fieldNames[i] = XBean.property(xBeanClass, indexs[i]);
+            }
+            return Sorts.descending(fieldNames);
+        }
+        @Override
+        public Object asc(Class<? extends XBean> xBeanClass, int... indexs) {
+            String[] fieldNames = new String[indexs.length];
+            for (int i = 0; i < indexs.length; i++) {
+                fieldNames[i] = XBean.property(xBeanClass, indexs[i]);
+            }
+            return Sorts.ascending(fieldNames);
         }
     }
 }
