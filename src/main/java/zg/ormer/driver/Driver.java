@@ -13,9 +13,12 @@ public abstract class Driver {
 
     public final ISort sort;
 
-    public Driver(ICondition condition, ISort sort) {
+    public final IProjection projection;
+
+    public Driver(ICondition condition, ISort sort, IProjection projection) {
         this.condition = condition;
         this.sort = sort;
+        this.projection = projection;
     }
 
     public abstract void insert(XBean xBean, Callback cb);
@@ -40,6 +43,10 @@ public abstract class Driver {
 
     public abstract void query(Class<? extends XBean> xBeanClass, Object condition, Object sort, Callback cb);
 
+    public abstract void projection(Class<? extends XBean> xBeanClass, Object condition, Object fields, Callback cb);
+
+    public abstract void projection(Class<? extends XBean> xBeanClass, Object condition, Object sort, Object fields, Callback cb);
+
     public interface ICondition {
         Object exists(Class<? extends XBean> xBeanClass, int index);
         Object eq(Class<? extends XBean> xBeanClass, int index, Object value);
@@ -57,6 +64,11 @@ public abstract class Driver {
     public interface ISort {
         Object desc(Class<? extends XBean> xBeanClass, int... indexs);
         Object asc(Class<? extends XBean> xBeanClass, int... indexs);
+    }
+
+    public interface IProjection {
+        Object include(Class<? extends XBean> xBeanClass, int... indexs);
+        Object exclude(Class<? extends XBean> xBeanClass, int... indexs);
     }
 
     @FunctionalInterface

@@ -6,6 +6,7 @@ import com.mongodb.async.client.MongoClients;
 import com.mongodb.async.client.MongoCollection;
 import com.mongodb.async.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.Sorts;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,7 +39,7 @@ public class MongoDriver extends Driver {
     }
 
     public MongoDriver(String ip, Integer port, String database, int connectNum) {
-        super(new MongoCondition(), new MongoSort());
+        super(new MongoCondition(), new MongoSort(), new MongoProjection());
         try {
             this.client = MongoClients.create(new ConnectionString("mongodb://" + ip + ":" + port));
             this.database = this.client.getDatabase(database);
@@ -160,6 +161,44 @@ public class MongoDriver extends Driver {
         });
     }
 
+    public void projection(Class<? extends XBean> xBeanClass, Object condition, Object fields, Callback cb) {
+        MongoCollection<Document> collection = this.database.getCollection(XBean.tblname(xBeanClass));
+        List<XBean> xBeans = new ArrayList<>();
+        collection.find((Bson)condition).projection((Bson)fields).forEach((document) -> {
+            try {
+                XBean xBean = this.pool.malloc(xBeanClass);
+                for (Map.Entry<String, Object> entry: document.entrySet()) {
+                    xBean.set(XBean.index(xBeanClass, entry.getKey()), entry.getValue());
+                }
+                xBeans.add(xBean);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, (result, throwable) -> {
+            cb.call(xBeans, throwable);
+            this.pool.free(xBeans);
+        });
+    }
+
+    public void projection(Class<? extends XBean> xBeanClass, Object condition, Object sort, Object fields, Callback cb) {
+        MongoCollection<Document> collection = this.database.getCollection(XBean.tblname(xBeanClass));
+        List<XBean> xBeans = new ArrayList<>();
+        collection.find((Bson)condition).sort((Bson)sort).projection((Bson)fields).forEach((document) -> {
+            try {
+                XBean xBean = this.pool.malloc(xBeanClass);
+                for (Map.Entry<String, Object> entry: document.entrySet()) {
+                    xBean.set(XBean.index(xBeanClass, entry.getKey()), entry.getValue());
+                }
+                xBeans.add(xBean);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, (result, throwable) -> {
+            cb.call(xBeans, throwable);
+            this.pool.free(xBeans);
+        });
+    }
+
     static class MongoCondition implements ICondition {
         @Override
         public Object exists(Class<? extends XBean> xBeanClass, int index) {
@@ -231,6 +270,25 @@ public class MongoDriver extends Driver {
                 fieldNames[i] = XBean.property(xBeanClass, indexs[i]);
             }
             return Sorts.ascending(fieldNames);
+        }
+    }
+
+    static class MongoProjection implements IProjection {
+        @Override
+        public Object include(Class<? extends XBean> xBeanClass, int... indexs) {
+            String[] fieldNames = new String[indexs.length];
+            for (int i = 0; i < indexs.length; i++) {
+                fieldNames[i] = XBean.property(xBeanClass, indexs[i]);
+            }
+            return Projections.include(fieldNames);
+        }
+        @Override
+        public Object exclude(Class<? extends XBean> xBeanClass, int... indexs) {
+            String[] fieldNames = new String[indexs.length];
+            for (int i = 0; i < indexs.length; i++) {
+                fieldNames[i] = XBean.property(xBeanClass, indexs[i]);
+            }
+            return Projections.exclude(fieldNames);
         }
     }
 }
