@@ -41,11 +41,19 @@ public abstract class Driver {
 
     public abstract void query(Class<? extends XBean> xBeanClass, Object condition, Callback cb);
 
+    public abstract void query(Class<? extends XBean> xBeanClass, Object condition, int limit, Callback cb);
+
     public abstract void query(Class<? extends XBean> xBeanClass, Object condition, Object sort, Callback cb);
+
+    public abstract void query(Class<? extends XBean> xBeanClass, Object condition, Object sort, int limit, Callback cb);
 
     public abstract void projection(Class<? extends XBean> xBeanClass, Object condition, Object fields, Callback cb);
 
+    public abstract void projection(Class<? extends XBean> xBeanClass, Object condition, Object fields, int limit, Callback cb);
+
     public abstract void projection(Class<? extends XBean> xBeanClass, Object condition, Object sort, Object fields, Callback cb);
+
+    public abstract void projection(Class<? extends XBean> xBeanClass, Object condition, Object sort, Object fields, int limit, Callback cb);
 
     public interface ICondition {
         Object exists(Class<? extends XBean> xBeanClass, int index);

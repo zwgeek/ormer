@@ -142,10 +142,48 @@ public class MongoDriver extends Driver {
         });
     }
 
+    public void query(Class<? extends XBean> xBeanClass, Object condition, int limit, Callback cb) {
+        MongoCollection<Document> collection = this.database.getCollection(XBean.tblname(xBeanClass));
+        List<XBean> xBeans = new ArrayList<>();
+        collection.find((Bson)condition).limit(limit).forEach((document) -> {
+            try {
+                XBean xBean = this.pool.malloc(xBeanClass);
+                for (Map.Entry<String, Object> entry: document.entrySet()) {
+                    xBean.set(XBean.index(xBeanClass, entry.getKey()), entry.getValue());
+                }
+                xBeans.add(xBean);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, (result, throwable) -> {
+            cb.call(xBeans, throwable);
+            this.pool.free(xBeans);
+        });
+    }
+
     public void query(Class<? extends XBean> xBeanClass, Object condition, Object sort, Callback cb) {
         MongoCollection<Document> collection = this.database.getCollection(XBean.tblname(xBeanClass));
         List<XBean> xBeans = new ArrayList<>();
         collection.find((Bson)condition).sort((Bson)sort).forEach((document) -> {
+            try {
+                XBean xBean = this.pool.malloc(xBeanClass);
+                for (Map.Entry<String, Object> entry: document.entrySet()) {
+                    xBean.set(XBean.index(xBeanClass, entry.getKey()), entry.getValue());
+                }
+                xBeans.add(xBean);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, (result, throwable) -> {
+            cb.call(xBeans, throwable);
+            this.pool.free(xBeans);
+        });
+    }
+
+    public void query(Class<? extends XBean> xBeanClass, Object condition, Object sort, int limit, Callback cb) {
+        MongoCollection<Document> collection = this.database.getCollection(XBean.tblname(xBeanClass));
+        List<XBean> xBeans = new ArrayList<>();
+        collection.find((Bson)condition).sort((Bson)sort).limit(limit).forEach((document) -> {
             try {
                 XBean xBean = this.pool.malloc(xBeanClass);
                 for (Map.Entry<String, Object> entry: document.entrySet()) {
@@ -180,10 +218,48 @@ public class MongoDriver extends Driver {
         });
     }
 
+    public void projection(Class<? extends XBean> xBeanClass, Object condition, Object fields, int limit, Callback cb) {
+        MongoCollection<Document> collection = this.database.getCollection(XBean.tblname(xBeanClass));
+        List<XBean> xBeans = new ArrayList<>();
+        collection.find((Bson)condition).projection((Bson)fields).limit(limit).forEach((document) -> {
+            try {
+                XBean xBean = this.pool.malloc(xBeanClass);
+                for (Map.Entry<String, Object> entry: document.entrySet()) {
+                    xBean.set(XBean.index(xBeanClass, entry.getKey()), entry.getValue());
+                }
+                xBeans.add(xBean);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, (result, throwable) -> {
+            cb.call(xBeans, throwable);
+            this.pool.free(xBeans);
+        });
+    }
+
     public void projection(Class<? extends XBean> xBeanClass, Object condition, Object sort, Object fields, Callback cb) {
         MongoCollection<Document> collection = this.database.getCollection(XBean.tblname(xBeanClass));
         List<XBean> xBeans = new ArrayList<>();
         collection.find((Bson)condition).sort((Bson)sort).projection((Bson)fields).forEach((document) -> {
+            try {
+                XBean xBean = this.pool.malloc(xBeanClass);
+                for (Map.Entry<String, Object> entry: document.entrySet()) {
+                    xBean.set(XBean.index(xBeanClass, entry.getKey()), entry.getValue());
+                }
+                xBeans.add(xBean);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, (result, throwable) -> {
+            cb.call(xBeans, throwable);
+            this.pool.free(xBeans);
+        });
+    }
+
+    public void projection(Class<? extends XBean> xBeanClass, Object condition, Object sort, Object fields, int limit, Callback cb) {
+        MongoCollection<Document> collection = this.database.getCollection(XBean.tblname(xBeanClass));
+        List<XBean> xBeans = new ArrayList<>();
+        collection.find((Bson)condition).sort((Bson)sort).projection((Bson)fields).limit(limit).forEach((document) -> {
             try {
                 XBean xBean = this.pool.malloc(xBeanClass);
                 for (Map.Entry<String, Object> entry: document.entrySet()) {
